@@ -1319,10 +1319,16 @@ func ExampleDataset_ToUpdateSql() {
 	)
 	fmt.Println(sql, args)
 
+	join := goqu.On(goqu.Ex{"items.name": goqu.I("items2.name")})
+	sql, args, _ = db.From("items").Join(goqu.I("items").As("items2"), join).ToUpdateSql(
+		map[string]interface{}{"items.name": "Test"},
+	)
+	fmt.Println(sql, args)
 	// Output:
 	// UPDATE "items" SET "address"='111 Test Addr',"name"='Test' []
 	// UPDATE "items" SET "address"='111 Test Addr',"name"='Test' []
 	// UPDATE "items" SET "address"='111 Test Addr',"name"='Test' []
+	// UPDATE "items" INNER JOIN "items" AS "items2" ON ("items"."name" = "items2"."name") SET "items"."name"='Test' []
 }
 
 func ExampleDataset_ToUpdateSql_prepared() {
@@ -1514,9 +1520,21 @@ func ExampleDataset_ToDeleteSql() {
 		ToDeleteSql()
 	fmt.Println(sql, args)
 
+	join := goqu.On(goqu.Ex{"items.name": goqu.I("items2.name")})
+	sql, args, _ = db.From("items").
+		Join(goqu.I("items").As("items2"), join).
+		Where(goqu.Ex{"id": goqu.Op{"gt": 10}}).
+		ToDeleteSql()
+	fmt.Println(sql, args)
+
+	sql, args, _ = db.From("items", "items2").ToDeleteSql()
+	fmt.Println(sql, args)
+
 	// Output:
 	// DELETE FROM "items" []
 	// DELETE FROM "items" WHERE ("id" > 10) []
+	// DELETE "items" FROM "items" INNER JOIN "items" AS "items2" ON ("items"."name" = "items2"."name") WHERE ("id" > 10) []
+	// DELETE "items", "items2" FROM "items", "items2" []
 }
 
 func ExampleDataset_ToDeleteSql_prepared() {

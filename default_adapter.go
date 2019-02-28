@@ -214,6 +214,8 @@ type (
 		InsertIgnoreSyntaxSupported  bool
 		WithCTESupported             bool
 		WithCTERecursiveSupported    bool
+		JoinOnUpdateSupported        bool
+		JoinOnDeleteSupported        bool
 	}
 )
 
@@ -274,6 +276,8 @@ func NewDefaultAdapter(ds *Dataset) Adapter {
 		ConflictTargetSupported:      true,
 		WithCTESupported:             true,
 		WithCTERecursiveSupported:    true,
+		JoinOnUpdateSupported:        true,
+		JoinOnDeleteSupported:        true,
 	}
 }
 
@@ -326,6 +330,14 @@ func (me *DefaultAdapter) SupportsWithCTE() bool {
 
 func (me *DefaultAdapter) SupportsWithRecursiveCTE() bool {
 	return me.WithCTERecursiveSupported
+}
+
+func (me *DefaultAdapter) SupportsJoinOnDelete() bool {
+	return me.JoinOnDeleteSupported
+}
+
+func (me *DefaultAdapter) SupportsJoinOnUpdate() bool {
+	return me.JoinOnUpdateSupported
 }
 
 //This is a proxy to Dataset.Literal. Used internally to ensure the correct method is called on any subclasses and to prevent duplication of code

@@ -211,7 +211,18 @@ func (me *datasetAdapterTest) TestBooleanOperations() {
 	sql, _, err = ds.Where(goqu.I("a").NotILike(regexp.MustCompile("(a|b)"))).ToSql()
 	assert.NoError(t, err)
 	assert.Equal(t, sql, "SELECT * FROM `test` WHERE (`a` NOT REGEXP '(a|b)')")
+}
 
+func (me *datasetAdapterTest) TestSupportsJoinOnDelete() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.False(t, dsAdapter.SupportsJoinOnDelete())
+}
+
+func (me *datasetAdapterTest) TestSupportsJoinOnUpdate() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.False(t, dsAdapter.SupportsJoinOnUpdate())
 }
 
 func TestDatasetAdapterSuite(t *testing.T) {

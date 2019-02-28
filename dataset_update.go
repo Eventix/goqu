@@ -42,6 +42,11 @@ func (me *Dataset) ToUpdateSql(update interface{}) (string, []interface{}, error
 	if err := me.adapter.SourcesSql(buf, me.clauses.From); err != nil {
 		return "", nil, err
 	}
+	if me.adapter.SupportsJoinOnUpdate() {
+		if err := me.adapter.JoinSql(buf, me.clauses.Joins); err != nil {
+			return "", nil, err
+		}
+	}
 	if err := me.adapter.UpdateExpressionsSql(buf, updates...); err != nil {
 		return "", nil, err
 	}

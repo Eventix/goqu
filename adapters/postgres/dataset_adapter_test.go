@@ -25,6 +25,25 @@ func (me *datasetAdapterTest) TestPlaceholderSql() {
 	assert.Equal(t, sql, "$1$2$3$4")
 }
 
+func (me *datasetAdapterTest) GetDs(table string) *goqu.Dataset {
+	ret := goqu.From(table)
+	adapter := newDatasetAdapter(ret)
+	ret.SetAdapter(adapter)
+	return ret
+}
+
+func (me *datasetAdapterTest) TestSupportsJoinOnDelete() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.False(t, dsAdapter.SupportsJoinOnDelete())
+}
+
+func (me *datasetAdapterTest) TestSupportsJoinOnUpdate() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.False(t, dsAdapter.SupportsJoinOnUpdate())
+}
+
 func TestDatasetAdapterSuite(t *testing.T) {
 	suite.Run(t, new(datasetAdapterTest))
 }

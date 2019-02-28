@@ -85,6 +85,8 @@ func newDatasetAdapter(ds *goqu.Dataset) goqu.Adapter {
 	def.ConflictUpdateWhereSupported = false
 	def.InsertIgnoreSyntaxSupported = true
 	def.ConflictTargetSupported = false
+	def.JoinOnDeleteSupported = false
+	def.JoinOnUpdateSupported = false
 	return &DatasetAdapter{def}
 }
 

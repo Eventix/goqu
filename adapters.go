@@ -18,6 +18,10 @@ type (
 		SupportsLimitOnDelete() bool
 		//Returns true if the dialect supports LIMIT expressions in UPDATE statements
 		SupportsLimitOnUpdate() bool
+		//Returns true if the dialect supports JOIN expressions in DELETE statements
+		SupportsJoinOnDelete() bool
+		//Returns true if the dialect supports JOIN expressions in UPDATE statements
+		SupportsJoinOnUpdate() bool
 		//Returns true if the dialect supports RETURN expressions
 		SupportsReturn() bool
 		//Generates the sql for placeholders. Only invoked when not interpolating values.

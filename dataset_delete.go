@@ -30,8 +30,18 @@ func (me *Dataset) ToDeleteSql() (string, []interface{}, error) {
 	if err := me.adapter.DeleteBeginSql(buf); err != nil {
 		return "", nil, err
 	}
+	if me.adapter.SupportsJoinOnDelete() && len(me.clauses.Joins) + len(me.clauses.From.Columns()) > 1 {
+		if err := me.adapter.SourcesSql(buf, me.clauses.From); err != nil {
+			return "", nil, err
+		}
+	}
 	if err := me.adapter.FromSql(buf, me.clauses.From); err != nil {
 		return "", nil, err
+	}
+	if me.adapter.SupportsJoinOnUpdate() {
+		if err := me.adapter.JoinSql(buf, me.clauses.Joins); err != nil {
+			return "", nil, err
+		}
 	}
 	if err := me.adapter.WhereSql(buf, me.clauses.Where); err != nil {
 		return "", nil, err

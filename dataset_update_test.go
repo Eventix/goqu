@@ -402,3 +402,16 @@ func (me *datasetTest) TestPreparedUpdateSqlWithReturning() {
 	assert.Equal(t, args, []interface{}{"111 Test Addr", "Test"})
 	assert.Equal(t, sql, `UPDATE "items" SET "address"=?,"name"=? WHERE ("name" IS NULL) RETURNING "items".*`)
 }
+
+func (me *datasetTest) TestUpdateSqlWithJoin() {
+	t := me.T()
+	ds1 := From("items")
+
+	sql, args, err := ds1.
+		Join(I("items").As("items2"), On(Ex{"items.name": I("items2.name")})).Prepared(true).
+		ToUpdateSql(Record{"name": "Test", "address": "111 Test Addr"})
+
+	assert.NoError(t, err)
+	assert.Equal(t, args, []interface{}{"111 Test Addr", "Test"})
+	assert.Equal(t, sql, `UPDATE "items" INNER JOIN "items" AS "items2" ON ("items"."name" = "items2"."name") SET "address"=?,"name"=?`)
+}

@@ -132,3 +132,16 @@ func (me *datasetTest) TestPreparedTruncateSql() {
 	assert.Equal(t, args, []interface{}{})
 	assert.Equal(t, sql, `TRUNCATE "items"`)
 }
+
+func (me *datasetTest) TestPreparedDeleteSqlWithJoin() {
+	t := me.T()
+	ds1 := From("items")
+
+	sql, args, err := ds1.
+		Join(I("items").As("items2"), On(Ex{"items.name": I("items2.name")})).Prepared(true).
+		ToDeleteSql()
+
+	assert.NoError(t, err)
+	assert.Equal(t, args, []interface{}{})
+	assert.Equal(t, sql, `DELETE "items" FROM "items" INNER JOIN "items" AS "items2" ON ("items"."name" = "items2"."name")`)
+}

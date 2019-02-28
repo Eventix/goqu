@@ -78,6 +78,18 @@ func (me *datasetAdapterTest) TestIdentifiers() {
 	assert.Equal(t, sql, "SELECT `a`, `a`.`b`.`c`, `c`.`d`, `test` AS `test` FROM `test`")
 }
 
+func (me *datasetAdapterTest) TestSupportsJoinOnDelete() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.True(t, dsAdapter.SupportsJoinOnDelete())
+}
+
+func (me *datasetAdapterTest) TestSupportsJoinOnUpdate() {
+	t := me.T()
+	dsAdapter := me.GetDs("test").Adapter()
+	assert.True(t, dsAdapter.SupportsJoinOnUpdate())
+}
+
 func (me *datasetAdapterTest) TestLiteralString() {
 	t := me.T()
 	ds := me.GetDs("test")
@@ -218,7 +230,22 @@ func (me *datasetAdapterTest) TestBooleanOperations() {
 	sql, _, err = ds.Where(goqu.I("a").NotILike(regexp.MustCompile("(a|b)"))).ToSql()
 	assert.NoError(t, err)
 	assert.Equal(t, sql, "SELECT * FROM `test` WHERE (`a` NOT REGEXP '(a|b)')")
+}
 
+func (me *datasetAdapterTest) TestUpdateAndDeleteWithJoin() {
+	t := me.T()
+	ds := me.GetDs("test").Join(goqu.I("test").As("t"), goqu.On(goqu.Ex{"test.a": "lit"}))
+	sql, _, err := ds.ToUpdateSql(map[string]interface{}{"t.a": "a"})
+	assert.NoError(t, err)
+	assert.Equal(t, sql, "UPDATE `test` INNER JOIN `test` AS `t` ON (`test`.`a` = 'lit') SET `t`.`a`='a'")
+
+	sql, _, err = ds.ToDeleteSql()
+	assert.NoError(t, err)
+	assert.Equal(t, sql, "DELETE `test` FROM `test` INNER JOIN `test` AS `t` ON (`test`.`a` = 'lit')")
+
+	sql, _, err = ds.From("test", "test2").ToDeleteSql()
+	assert.NoError(t, err)
+	assert.Equal(t, sql, "DELETE `test`, `test2` FROM `test`, `test2` INNER JOIN `test` AS `t` ON (`test`.`a` = 'lit')")
 }
 
 func TestDatasetAdapterSuite(t *testing.T) {
